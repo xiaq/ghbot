@@ -154,7 +154,7 @@ func eventToMessage(eventType string, req []byte) []string {
 
 func humanizeRef(ref string) string {
 	if strings.HasPrefix(ref, "refs/heads/") {
-		return ref[len("refs/heads/"):] + " branch"
+		return "branch " + ref[len("refs/heads/"):]
 	}
 	return ref
 }
