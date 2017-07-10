@@ -91,7 +91,7 @@ func eventToMessage(eventType string, req []byte) []string {
 				humanizeRef(event.Ref)),
 		}
 		for _, commit := range event.Commits {
-			lines = append(lines, fmt.Sprintf("%s (by %s)",
+			lines = append(lines, fmt.Sprintf("  %s (by %s)",
 				firstLine(commit.Message), commit.Author.Name))
 		}
 		return lines
