@@ -15,8 +15,7 @@ import (
 var (
 	addrFlag     = flag.String("addr", ":9171", "address to listen to GitHub webhooks")
 	initFlag     = flag.String("init", "", "File containing initial instructions")
-	channelsFlag = flag.String("channels",
-		"elvish,elvish-zh,elvish-dev,elvish-dev-zh",
+	channelsFlag = flag.String("channels", "",
 		"A comma-separated list of channels to join")
 )
 
