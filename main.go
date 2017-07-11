@@ -61,17 +61,19 @@ func main() {
 		ircClient.Sendf("JOIN :#%s", channel)
 	}
 
+	messengers := make([]Messenger, len(channels))
+	for i, channel := range channels {
+		messengers[i] = &IRCMessenger{ircClient, channel}
+	}
+
 	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
 		body, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			log.Println("cannot read request:", err)
 			return
 		}
-		msglines := eventToMessage(req.Header.Get("X-Github-Event"), body)
-		for _, line := range msglines {
-			for _, channel := range channels {
-				ircClient.Sendf("PRIVMSG #%s :%s", channel, line)
-			}
+		for _, m := range messengers {
+			eventToMessage(req.Header.Get("X-Github-Event"), body, m)
 		}
 	})
 

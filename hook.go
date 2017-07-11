@@ -64,7 +64,7 @@ type Sender struct {
 	Login string `json:"login"`
 }
 
-func eventToMessage(eventType string, req []byte) []string {
+func eventToMessage(eventType string, req []byte, m Messenger) {
 	parse := func(event interface{}) bool {
 		err := json.Unmarshal(req, event)
 		if err == nil {
@@ -78,58 +78,51 @@ func eventToMessage(eventType string, req []byte) []string {
 	switch eventType {
 	case "ping":
 		log.Println("pinged")
-		return nil
 	case "push":
 		var event PushEvent
 		if !parse(&event) {
-			return nil
+			return
 		}
-		lines := []string{
-			fmt.Sprintf("@%s pushed %s to %s:",
-				event.Sender.Login,
-				withNum(len(event.Commits), "commit", "commits"),
-				humanizeRef(event.Ref)),
-		}
+		m.Messagef("@%s pushed %s to %s:",
+			event.Sender.Login,
+			withNum(len(event.Commits), "commit", "commits"),
+			humanizeRef(event.Ref))
 		for _, commit := range event.Commits {
-			lines = append(lines, fmt.Sprintf("  %s (by %s)",
-				firstLine(commit.Message), commit.Author.Name))
+			m.Messagef("  %s (by %s)",
+				firstLine(commit.Message), commit.Author.Name)
 		}
-		return lines
 	case "issues":
 		var event IssuesEvent
 		if !parse(&event) {
-			return nil
+			return
 		}
 		switch event.Action {
 		case "opened", "closed":
-			return []string{
-				fmt.Sprintf("@%s %s issue #%d (%s)",
-					event.Sender.Login, event.Action,
-					event.Issue.Number, event.Issue.Title)}
+			m.Messagef("@%s %s issue #%d (%s)",
+				event.Sender.Login, event.Action,
+				event.Issue.Number, event.Issue.Title)
 		default:
 			log.Println("ignored issue being", event.Action)
 		}
-		return nil
+		return
 	case "issue_comment":
 		var event IssueCommentEvent
 		if !parse(&event) {
-			return nil
+			return
 		}
 		switch event.Action {
 		case "created":
-			return []string{
-				fmt.Sprintf("@%s commented on issue #%d (%s):",
-					event.Sender.Login, event.Issue.Number, event.Issue.Title),
-				fmt.Sprintf("  %s", abbrComment(event.Comment.Body)),
-			}
+			m.Messagef("@%s commented on issue #%d (%s):",
+				event.Sender.Login, event.Issue.Number, event.Issue.Title)
+			m.Messagef("  %s", abbrComment(event.Comment.Body))
 		default:
 			log.Println("ignored issue comment being", event.Action)
-			return nil
+			return
 		}
 	case "pull_request":
 		var event PullRequestEvent
 		if !parse(&event) {
-			return nil
+			return
 		}
 		switch event.Action {
 		case "opened", "closed", "reopened":
@@ -137,18 +130,16 @@ func eventToMessage(eventType string, req []byte) []string {
 			if action == "closed" && event.PullRequest.Merged {
 				action = "merged"
 			}
-			return []string{
-				fmt.Sprintf("@%s %s pull request #%d (%s)",
-					event.Sender.Login, action,
-					event.PullRequest.Number, event.PullRequest.Title),
-			}
+			m.Messagef("@%s %s pull request #%d (%s)",
+				event.Sender.Login, action,
+				event.PullRequest.Number, event.PullRequest.Title)
 		default:
 			log.Println("ignored pull request being", event.Action)
-			return nil
+			return
 		}
 	default:
 		log.Println("ignored event", eventType)
-		return nil
+		return
 	}
 }
 
