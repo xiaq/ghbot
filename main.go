@@ -42,8 +42,13 @@ func main() {
 		select {
 		case <-sigs:
 			ircClient.Send("QUIT")
-			log.Println("interrupted, quitting after 1s")
-			time.Sleep(time.Second)
+			log.Println("interrupted, sent QUIT, exiting after disconnect or 1s")
+			select {
+			case <-time.After(time.Second):
+				log.Println("1s timeout, exiting anyway")
+			case <-disconnect:
+				log.Println("disconnected, exiting")
+			}
 		case <-disconnect:
 			log.Println("server disconnected, quitting")
 		}
