@@ -120,7 +120,7 @@ func eventToMessage(eventType string, req []byte) []string {
 			return []string{
 				fmt.Sprintf("@%s commented on issue #%d (%s):",
 					event.Sender.Login, event.Issue.Number, event.Issue.Title),
-				fmt.Sprintf("  %s", abbrToFirstLine(event.Comment.Body)),
+				fmt.Sprintf("  %s", abbrComment(event.Comment.Body)),
 			}
 		default:
 			log.Println("ignored issue comment being", event.Action)
@@ -159,12 +159,18 @@ func humanizeRef(ref string) string {
 	return ref
 }
 
-func abbrToFirstLine(s string) string {
-	a := firstLine(s)
-	if a == s {
-		return a
+func abbrComment(s string) string {
+	nrune := 0
+	for i, r := range s {
+		nrune++
+		if r == '\r' || r == '\n' || (r == ' ' && nrune > 100) {
+			return s[:i] + " ... (omitted)"
+		}
+		if nrune > 120 {
+			return s[:i] + "... (omitted)"
+		}
 	}
-	return a + " ... (omitted)"
+	return s
 }
 
 func firstLine(s string) string {
