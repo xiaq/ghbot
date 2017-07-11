@@ -17,14 +17,33 @@ var (
 	initFlag     = flag.String("init", "", "File containing initial instructions")
 	channelsFlag = flag.String("channels", "",
 		"A comma-separated list of channels to join")
+	languagesFlag = flag.String("languages", "",
+		"A common-separated list of languages for each channel.")
 )
 
 func main() {
 	flag.Parse()
 	channels := strings.Split(*channelsFlag, ",")
-	if *initFlag == "" {
-		log.Println("-init is required")
+	languages := strings.Split(*languagesFlag, ",")
+	require := func(s string, arg string) {
+		if s == "" {
+			log.Println(arg, "is required")
+			os.Exit(1)
+		}
+	}
+	require(*initFlag, "-init")
+	require(*channelsFlag, "-channels")
+	require(*languagesFlag, "-languages")
+
+	if len(channels) != len(languages) {
+		log.Println("-channels and -languages should have the same number of elements")
 		os.Exit(1)
+	}
+	for _, language := range languages {
+		if _, ok := messengerMakers[language]; !ok {
+			log.Printf("language %q not supported", language)
+			os.Exit(1)
+		}
 	}
 	initBytes, err := ioutil.ReadFile(*initFlag)
 	if err != nil {
@@ -68,7 +87,7 @@ func main() {
 
 	messengers := make([]Messenger, len(channels))
 	for i, channel := range channels {
-		messengers[i] = &IRCMessenger{ircClient, channel}
+		messengers[i] = messengerMakers[languages[i]](ircClient, channel)
 	}
 
 	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {

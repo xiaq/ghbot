@@ -2,9 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"strings"
 )
 
 // The following Event structs and the objects they use only contain the fields
@@ -101,36 +99,4 @@ func eventToMessage(eventType string, req []byte, m Messenger) {
 	default:
 		log.Println("ignored event", eventType)
 	}
-}
-
-func humanizeRef(ref string) string {
-	if strings.HasPrefix(ref, "refs/heads/") {
-		return "branch " + ref[len("refs/heads/"):]
-	}
-	return ref
-}
-
-func abbrComment(s string) string {
-	nrune := 0
-	for i, r := range s {
-		nrune++
-		if r == '\r' || r == '\n' || (r == ' ' && nrune > 100) {
-			return s[:i] + " ... (omitted)"
-		}
-		if nrune > 120 {
-			return s[:i] + "... (omitted)"
-		}
-	}
-	return s
-}
-
-func firstLine(s string) string {
-	return strings.SplitN(s, "\n", 2)[0]
-}
-
-func withNum(n int, single, plural string) string {
-	if n == 1 {
-		return "1 " + single
-	}
-	return fmt.Sprintf("%d %s", n, plural)
 }
