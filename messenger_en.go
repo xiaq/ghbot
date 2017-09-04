@@ -15,10 +15,10 @@ func MakeIRCMessengerEn(ircClient *IRCClient, channel string) Messenger {
 }
 
 func (m *IRCMessengerEn) OnPush(event PushEvent) {
-	m.Messagef("@%s pushed %s to %s:",
+	m.Messagef("%s pushed %s to %s (%s):",
 		event.Sender.Login,
 		withNumEn(len(event.Commits), "commit", "commits"),
-		humanizeRefEn(event.Ref))
+		humanizeRefEn(event.Ref), event.Compare)
 	for _, commit := range event.Commits {
 		m.Messagef("  %s (by %s)",
 			firstLine(commit.Message), commit.Author.Name)
@@ -28,9 +28,9 @@ func (m *IRCMessengerEn) OnPush(event PushEvent) {
 func (m *IRCMessengerEn) OnIssues(event IssuesEvent) {
 	switch event.Action {
 	case "opened", "closed":
-		m.Messagef("@%s %s issue #%d (%s)",
+		m.Messagef("%s %s issue #%d %s (%s)",
 			event.Sender.Login, event.Action,
-			event.Issue.Number, event.Issue.Title)
+			event.Issue.Number, event.Issue.Title, event.Issue.URL)
 	default:
 		log.Println("ignored issue being", event.Action)
 	}
@@ -39,8 +39,9 @@ func (m *IRCMessengerEn) OnIssues(event IssuesEvent) {
 func (m *IRCMessengerEn) OnIssueComment(event IssueCommentEvent) {
 	switch event.Action {
 	case "created":
-		m.Messagef("@%s commented on issue #%d (%s):",
-			event.Sender.Login, event.Issue.Number, event.Issue.Title)
+		m.Messagef("%s commented on issue #%d %s (%s):",
+			event.Sender.Login,
+			event.Issue.Number, event.Issue.Title, event.Issue.URL)
 		m.Messagef("  %s", abbrCommentEn(event.Comment.Body))
 	default:
 		log.Println("ignored issue comment being", event.Action)
@@ -54,9 +55,10 @@ func (m *IRCMessengerEn) OnPullRequest(event PullRequestEvent) {
 		if action == "closed" && event.PullRequest.Merged {
 			action = "merged"
 		}
-		m.Messagef("@%s %s pull request #%d (%s)",
+		m.Messagef("%s %s pull request #%d %s (%s)",
 			event.Sender.Login, action,
-			event.PullRequest.Number, event.PullRequest.Title)
+			event.PullRequest.Number, event.PullRequest.Title,
+			event.PullRequest.URL)
 	default:
 		log.Println("ignored pull request being", event.Action)
 	}

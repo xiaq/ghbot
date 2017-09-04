@@ -15,8 +15,9 @@ func MakeIRCMessengerZh(ircClient *IRCClient, channel string) Messenger {
 }
 
 func (m *IRCMessengerZh) OnPush(event PushEvent) {
-	m.Messagef("@%s 向 %s推了 %d 个 commit：",
-		event.Sender.Login, humanizeRefZh(event.Ref), len(event.Commits))
+	m.Messagef("%s 向 %s推了 %d 个 commit (%s)：",
+		event.Sender.Login, humanizeRefZh(event.Ref), len(event.Commits),
+		event.Compare)
 	for _, commit := range event.Commits {
 		m.Messagef("  %s (by %s)",
 			firstLine(commit.Message), commit.Author.Name)
@@ -31,7 +32,7 @@ var issueActionMap = map[string]string{
 func (m *IRCMessengerZh) OnIssues(event IssuesEvent) {
 	switch event.Action {
 	case "opened", "closed":
-		m.Messagef("@%s %s issue #%d (%s)",
+		m.Messagef("%s %s issue #%d %s (%s)",
 			event.Sender.Login, issueActionMap[event.Action],
 			event.Issue.Number, event.Issue.Title)
 	default:
@@ -42,8 +43,9 @@ func (m *IRCMessengerZh) OnIssues(event IssuesEvent) {
 func (m *IRCMessengerZh) OnIssueComment(event IssueCommentEvent) {
 	switch event.Action {
 	case "created":
-		m.Messagef("@%s 评论了 issue #%d (%s):",
-			event.Sender.Login, event.Issue.Number, event.Issue.Title)
+		m.Messagef("%s 评论了 issue #%d %s (%s):",
+			event.Sender.Login,
+			event.Issue.Number, event.Issue.Title, event.Issue.URL)
 		m.Messagef("  %s", abbrCommentZh(event.Comment.Body))
 	default:
 		log.Println("ignored issue comment being", event.Action)
@@ -64,9 +66,10 @@ func (m *IRCMessengerZh) OnPullRequest(event PullRequestEvent) {
 		if action == "closed" && event.PullRequest.Merged {
 			action = "merged"
 		}
-		m.Messagef("@%s %s PR #%d (%s)",
+		m.Messagef("%s %s PR #%d %s (%s)",
 			event.Sender.Login, pullRequestActionMap[action],
-			event.PullRequest.Number, event.PullRequest.Title)
+			event.PullRequest.Number, event.PullRequest.Title,
+			event.PullRequest.URL)
 	default:
 		log.Println("ignored pull request being", event.Action)
 	}

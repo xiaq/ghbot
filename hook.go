@@ -11,6 +11,7 @@ import (
 type PushEvent struct {
 	Sender  Sender   `json:"sender"`
 	Ref     string   `json:"ref"`
+	Compare string   `json:"compare"`
 	Commits []Commit `json:"commits"`
 }
 
@@ -37,6 +38,7 @@ type PullRequestEvent struct {
 type Commit struct {
 	Author  GitAuthor `json:"author"`
 	Message string    `json:"message"`
+	URL     string    `json:"url"`
 }
 
 type GitAuthor struct {
@@ -46,16 +48,19 @@ type GitAuthor struct {
 type Issue struct {
 	Number int    `json:"number"`
 	Title  string `json:"title"`
+	URL    string `json:"url"`
 }
 
 type Comment struct {
 	Body string `json:"body"`
+	URL  string `json:"url"`
 }
 
 type PullRequest struct {
 	Number int    `json:"number"`
 	Title  string `json:"title"`
 	Merged bool   `json:"merged"`
+	URL    string `json:"url"`
 }
 
 type Sender struct {
