@@ -84,10 +84,10 @@ func abbrCommentZh(s string) string {
 	for i, r := range s {
 		nrune++
 		if r == '\r' || r == '\n' || (r == ' ' && nrune > 100) {
-			fmt.Sprintf("%s ... (略去 %d 字节)", s[:i], len(s)-i)
+			return fmt.Sprintf("%s ... (略去 %d 字节)", s[:i], len(s)-i)
 		}
 		if nrune > 120 {
-			fmt.Sprintf("%s... (略去 %d 字节)", s[:i], len(s)-i)
+			return fmt.Sprintf("%s... (略去 %d 字节)", s[:i], len(s)-i)
 		}
 	}
 	return s
