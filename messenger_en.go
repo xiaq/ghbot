@@ -15,10 +15,10 @@ func MakeIRCMessengerEn(ircClient *IRCClient, channel string) Messenger {
 }
 
 func (m *IRCMessengerEn) OnPush(event PushEvent) {
-	m.Messagef("%s pushed %s to %s (%s):",
+	m.Messagef("%s pushed %s to %s:",
 		event.Sender.Login,
 		withNumEn(len(event.Commits), "commit", "commits"),
-		humanizeRefEn(event.Ref), event.Compare)
+		humanizeRefEn(event.Ref))
 	for _, commit := range event.Commits {
 		m.Messagef("  %s (by %s)",
 			firstLine(commit.Message), commit.Author.Name)
@@ -30,7 +30,7 @@ func (m *IRCMessengerEn) OnIssues(event IssuesEvent) {
 	case "opened", "closed":
 		m.Messagef("%s %s issue #%d %s (%s)",
 			event.Sender.Login, event.Action,
-			event.Issue.Number, event.Issue.Title, event.Issue.URL)
+			event.Issue.Number, event.Issue.Title, event.Issue.HTMLURL)
 	default:
 		log.Println("ignored issue being", event.Action)
 	}
@@ -41,7 +41,7 @@ func (m *IRCMessengerEn) OnIssueComment(event IssueCommentEvent) {
 	case "created":
 		m.Messagef("%s commented on issue #%d %s (%s):",
 			event.Sender.Login,
-			event.Issue.Number, event.Issue.Title, event.Issue.URL)
+			event.Issue.Number, event.Issue.Title, event.Issue.HTMLURL)
 		m.Messagef("  %s", abbrCommentEn(event.Comment.Body))
 	default:
 		log.Println("ignored issue comment being", event.Action)
@@ -58,7 +58,7 @@ func (m *IRCMessengerEn) OnPullRequest(event PullRequestEvent) {
 		m.Messagef("%s %s pull request #%d %s (%s)",
 			event.Sender.Login, action,
 			event.PullRequest.Number, event.PullRequest.Title,
-			event.PullRequest.URL)
+			event.PullRequest.HTMLURL)
 	default:
 		log.Println("ignored pull request being", event.Action)
 	}

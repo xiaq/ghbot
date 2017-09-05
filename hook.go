@@ -38,7 +38,6 @@ type PullRequestEvent struct {
 type Commit struct {
 	Author  GitAuthor `json:"author"`
 	Message string    `json:"message"`
-	URL     string    `json:"url"`
 }
 
 type GitAuthor struct {
@@ -46,21 +45,21 @@ type GitAuthor struct {
 }
 
 type Issue struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-	URL    string `json:"url"`
+	Number  int    `json:"number"`
+	Title   string `json:"title"`
+	HTMLURL string `json:"html_url"`
 }
 
 type Comment struct {
-	Body string `json:"body"`
-	URL  string `json:"url"`
+	Body    string `json:"body"`
+	HTMLURL string `json:"html_url"`
 }
 
 type PullRequest struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-	Merged bool   `json:"merged"`
-	URL    string `json:"url"`
+	Number  int    `json:"number"`
+	Title   string `json:"title"`
+	Merged  bool   `json:"merged"`
+	HTMLURL string `json:"html_url"`
 }
 
 type Sender struct {
