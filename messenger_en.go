@@ -39,10 +39,10 @@ func (m *IRCMessengerEn) OnIssues(event IssuesEvent) {
 func (m *IRCMessengerEn) OnIssueComment(event IssueCommentEvent) {
 	switch event.Action {
 	case "created":
-		m.Messagef("%s commented on issue #%d %s (%s):",
+		m.Messagef("%s commented on issue #%d %s (%s): %s",
 			event.Sender.Login,
-			event.Issue.Number, event.Issue.Title, event.Issue.HTMLURL)
-		m.Messagef("  %s", abbrCommentEn(event.Comment.Body))
+			event.Issue.Number, event.Issue.Title, event.Issue.HTMLURL,
+			abbrCommentEn(event.Comment.Body))
 	default:
 		log.Println("ignored issue comment being", event.Action)
 	}
