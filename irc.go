@@ -54,7 +54,7 @@ func dialIRC(disconnect chan<- struct{}) *IRCClient {
 	// between two messages.
 	go func() {
 		for msg := range c.queue {
-			log.Println("sending %d bytes: %s", len(msg), msg)
+			log.Printf("sending %d bytes: %s", len(msg), msg)
 			c.SetWriteDeadline(time.Now().Add(writeTimeout))
 			_, err := c.Write(append([]byte(msg), crLf...))
 			if err != nil {
