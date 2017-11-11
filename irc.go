@@ -15,7 +15,7 @@ const (
 
 var (
 	ircServerAddr = "irc.freenode.net:6697"
-	writeDeadline = 5 * time.Second
+	writeTimeout  = 5 * time.Second
 	crLf          = []byte("\r\n")
 	ping          = []byte("PING")
 )
@@ -39,10 +39,10 @@ func dialIRC(disconnect chan<- struct{}) *IRCClient {
 		for {
 			nr, err := conn.Read(buf[:])
 			if err != nil {
-				log.Println("read error:", err)
+				log.Println("cannot receive:", err)
 				break
 			}
-			log.Printf("server sent %d bytes: %s", nr, buf[:nr])
+			log.Printf("received %d bytes: %s", nr, buf[:nr])
 			if bytes.HasPrefix(buf[:nr], ping) {
 				rest := buf[len(ping) : nr-2]
 				c.Sendf("PONG%s", rest)
@@ -54,12 +54,11 @@ func dialIRC(disconnect chan<- struct{}) *IRCClient {
 	// between two messages.
 	go func() {
 		for msg := range c.queue {
-			c.Lock()
-			defer c.Unlock()
-			c.SetWriteDeadline(time.Now().Add(writeDeadline))
+			log.Println("sending %d bytes: %s", len(msg), msg)
+			c.SetWriteDeadline(time.Now().Add(writeTimeout))
 			_, err := c.Write(append([]byte(msg), crLf...))
 			if err != nil {
-				log.Println("failed to send message:", err)
+				log.Println("cannot send:", err)
 			}
 			time.Sleep(2 * time.Second)
 		}
